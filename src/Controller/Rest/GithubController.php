@@ -44,7 +44,9 @@ class GithubController extends AbstractController
 
             $this->getCommitsInfo($repoUrl, $date, $repoData, $curlService);
 
-            $this->getReadmeAndLicenseInfo($repoUrl, $repoData, $curlService);
+            $this->getReadmeInfo($repoUrl, $repoData, $curlService);
+
+            $this->getLicenseInfo($repoUrl, $repoData, $curlService);
 
         } catch (Exception $e) {
             throw new Exception($e->getMessage(), $e->getCode(), $e->getData() ?? []);
@@ -62,16 +64,24 @@ class GithubController extends AbstractController
     {
         $repoInfoApi = $this->generateGithubApi($repoUrl, 'repos/%s/%s');
         $githubData = $curlService->callGithubApi($repoInfoApi);
-
         if (\count($githubData) > 0) {
             $repoData = [
-                'title' => explode('/', $githubData['full_name'])[0],
-                'subtitle' => $githubData['name'],
+                'title' => explode('/', $githubData['name'])[0],
+                'subtitle' => $githubData['description'],
+                'html_url' => $githubData['html_url'],
                 'star' => $githubData['stargazers_count'],
                 'owner' => [
                     'name' => $githubData['owner']['login'],
                     'avatar_url' => $githubData['owner']['avatar_url'],
+                    'html_url' => $githubData['owner']['html_url'],
+                ],
+                'license' => [
+                    'key' => $githubData['license']['key'],
+                    'name' => $githubData['license']['name'],
+                    'spdx_id' => $githubData['license']['spdx_id'],
+                    'url' => $githubData['license']['url'],
                 ]
+
             ];
         }
     }
@@ -97,7 +107,7 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private function getReadmeAndLicenseInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private function getReadmeInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoReadmeApi = $this->generateGithubApi($repoUrl, 'repos/%s/%s/readme');
         $githubData = $curlService->callGithubApi($repoReadmeApi);
@@ -105,18 +115,24 @@ class GithubController extends AbstractController
         if (\count($githubData) > 0) {
             $repoData['readme'] = [
                 'url' => $githubData['html_url'],
-                'content' => $githubData['content']
+                'content' => base64_decode($githubData['content'])
             ];
         }
+    }
 
+    /**
+     * @param $repoUrl
+     * @param $repoData
+     * @param CurlService $curlService
+     */
+    private function getLicenseInfo($repoUrl, &$repoData, CurlService $curlService): void
+    {
         $repoLicenseApi = $this->generateGithubApi($repoUrl, 'repos/%s/%s/license');
         $githubData = $curlService->callGithubApi($repoLicenseApi);
 
         if (\count($githubData) > 0) {
-            $repoData['license'] = [
-                'url' => $githubData['html_url'],
-                'content' => $githubData['content']
-            ];
+            $repoData['license']['url'] = $githubData['html_url'];
+            $repoData['license']['content'] = base64_decode($githubData['content']);
         }
     }
 
