@@ -1,4 +1,5 @@
 parameters:
+    locale: 'en'
 
 services:
     _defaults:
@@ -21,3 +22,12 @@ services:
     App\EventListener\RequestListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request }
+
+    admin.category:
+        class: App\Admin\GithubAdmin
+        arguments: [~, App\Entity\Github, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: Menu, label: Github }
+        public: true
+
+

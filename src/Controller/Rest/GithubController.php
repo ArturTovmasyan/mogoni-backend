@@ -3,7 +3,9 @@
 namespace App\Controller\Rest;
 
 use App\Controller\Exception\Exception;
+use App\Entity\Github;
 use App\Services\CurlService;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -48,11 +50,13 @@ class GithubController extends AbstractController
 
             $this->getLicenseInfo($repoUrl, $repoData, $curlService);
 
+            $this->saveGithubData($repoData);
+
         } catch (Exception $e) {
             throw new Exception($e->getMessage(), $e->getCode(), $e->getData() ?? []);
         }
 
-        return new JsonResponse([$repoData], JsonResponse::HTTP_OK);
+        return $this->json([$repoData], JsonResponse::HTTP_OK);
     }
 
     /**
@@ -207,7 +211,45 @@ class GithubController extends AbstractController
     private function generateGithubApi($repoUrl, $githubApi): string
     {
         $repoUrlData = explode('/', $repoUrl);
-
         return sprintf($githubApi, $repoUrlData[3], $repoUrlData[4]);
+    }
+
+    /**
+     * @param $githubData
+     */
+    private function saveGithubData($githubData): void
+    {
+        /** @var EntityManager $entityManager */
+        $entityManager = $this->getDoctrine()->getManager();
+
+        /** @var Github $existGithubData */
+        $github = $entityManager->getRepository(Github::class)->findOneBy(['url' => $githubData['html_url']]);
+
+        // create github data
+
+        if (!\is_object($github)) {
+            $github = new Github();
+        }
+
+        $lastCommitDate = new \DateTime($githubData['commits']['lastDate']);
+
+        $github->setTitle($githubData['title']);
+        $github->setSubtitle($githubData['subtitle']);
+        $github->setUrl($githubData['html_url']);
+        $github->setStarsCount($githubData['star']);
+        $github->setOwnerName($githubData['owner']['name']);
+        $github->setMainLanguage($githubData['language']);
+        $github->setOwnerAvatarUrl($githubData['owner']['avatar_url']);
+        $github->setOwnerGithubUrl($githubData['owner']['html_url']);
+        $github->setClosedIssuesCount($githubData['issues']['closed']);
+        $github->setOpenIssueCount($githubData['issues']['opened']);
+        $github->setCommitsCount($githubData['commits']['last2Month']);
+        $github->setLastCommitDate($lastCommitDate);
+        $github->setAllCommitCount($githubData['commits']['total']);
+        $github->setLicense($githubData['license']);
+        $github->setReadme($githubData['readme']);
+
+        $entityManager->persist($github);
+        $entityManager->flush();
     }
 }

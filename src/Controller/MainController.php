@@ -13,6 +13,8 @@ class MainController extends AbstractController
      */
     public function index(): Response
     {
-        return new Response('<p><strong>MOGONI PROJECT</strong></p>');
+        return $this->render('main/index.html.twig', [
+            'controller_name' => 'MainController',
+        ]);
     }
 }

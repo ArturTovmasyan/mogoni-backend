@@ -1,0 +1,5 @@
+{
+    "sonata-project/doctrine-orm-admin-bundle": {
+        "version": "3.6.3"
+    }
+}
