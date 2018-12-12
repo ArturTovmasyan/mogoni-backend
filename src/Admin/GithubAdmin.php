@@ -5,6 +5,7 @@
  * Date: 12/12/18
  * Time: 10:09 PM
  */
+
 namespace App\Admin;
 
 use Sonata\AdminBundle\Admin\AbstractAdmin;
@@ -23,7 +24,8 @@ class GithubAdmin extends AbstractAdmin
     /**
      * @param RouteCollection $collection
      */
-    public function configureRoutes(RouteCollection $collection) {
+    public function configureRoutes(RouteCollection $collection)
+    {
         $collection->remove('export');
     }
 
@@ -34,17 +36,17 @@ class GithubAdmin extends AbstractAdmin
     {
         $showMapper
             ->add('id')
-            ->add('title')
+            ->add('title', null, ['label' => 'Repo Name'])
             ->add('subtitle')
-            ->add('url')
-            ->add('ownerName')
+            ->add('url', null, ['label' => 'Repo URL'])
+            ->add('ownerName', null, ['label' => 'Name'])
             ->add('ownerAvatarUrl')
-            ->add('ownerGithubUrl')
-            ->add('starsCount')
-            ->add('mainLanguage')
+            ->add('ownerGithubUrl', null, ['label' => 'Github URL'])
+            ->add('starsCount', null, ['label' => 'Number of Stars'])
+            ->add('mainLanguage', null, ['label' => 'Primary language'])
             ->add('openIssueCount')
             ->add('closedIssuesCount')
-            ->add('lastCommitDate', 'date', ['widget' => 'single_text'])
+            ->add('lastCommitDate', null, ['widget' => 'single_text'])
             ->add('commitsCount')
             ->add('allCommitCount');
     }
@@ -55,19 +57,20 @@ class GithubAdmin extends AbstractAdmin
     protected function configureFormFields(FormMapper $formMapper)
     {
         $formMapper
-            ->add('title')
+            ->add('title', null, ['label' => 'Repo Name'])
             ->add('subtitle')
-            ->add('url')
-            ->add('ownerName')
+            ->add('url', null, ['label' => 'Repo URL'])
+            ->add('ownerName', null, ['label' => 'Name'])
             ->add('ownerAvatarUrl')
-            ->add('ownerGithubUrl')
-            ->add('starsCount')
-            ->add('mainLanguage')
+            ->add('ownerGithubUrl', null, ['label' => 'Github URL'])
+            ->add('starsCount', null, ['label' => 'Number of Stars'])
+            ->add('mainLanguage', null, ['label' => 'Primary language'])
             ->add('openIssueCount')
             ->add('closedIssuesCount')
             ->add('lastCommitDate', null, ['widget' => 'single_text'])
             ->add('commitsCount')
             ->add('allCommitCount');
+
     }
 
     /**
@@ -87,19 +90,12 @@ class GithubAdmin extends AbstractAdmin
     protected function configureListFields(ListMapper $listMapper)
     {
         $listMapper
-            ->addIdentifier('title')
-            ->add('subtitle')
-            ->add('url')
-            ->add('ownerName')
-            ->add('ownerAvatarUrl')
-            ->add('ownerGithubUrl')
-            ->add('starsCount')
-            ->add('mainLanguage')
-            ->add('openIssueCount')
-            ->add('closedIssuesCount')
-            ->add('lastCommitDate', null, ['widget' => 'single_text'])
-            ->add('commitsCount')
-            ->add('allCommitCount')
+            ->addIdentifier('ownerName', null, ['label' => 'Name'])
+            ->add('ownerGithubUrl', null, ['label' => 'Github URL'])
+            ->add('title', null, ['label' => 'Repo Name'])
+            ->add('url', null, ['label' => 'Repo URL'])
+            ->add('mainLanguage', null, ['label' => 'Primary language'])
+            ->add('starsCount', null, ['label' => 'Number of Stars'])
             ->add('_action', null, [
                 'actions' => [
                     'show' => [],
