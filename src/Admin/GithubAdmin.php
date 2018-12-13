@@ -40,15 +40,17 @@ class GithubAdmin extends AbstractAdmin
             ->add('subtitle')
             ->add('url', null, ['label' => 'Repo URL'])
             ->add('ownerName', null, ['label' => 'Name'])
-            ->add('ownerAvatarUrl')
+            ->add('ownerAvatarUrl', null, ['label' => 'Avatar URL'])
             ->add('ownerGithubUrl', null, ['label' => 'Github URL'])
             ->add('starsCount', null, ['label' => 'Number of Stars'])
             ->add('mainLanguage', null, ['label' => 'Primary language'])
-            ->add('openIssueCount')
-            ->add('closedIssuesCount')
+            ->add('openIssueCount', null, ['label' => 'Opened Issue'])
+            ->add('closedIssuesCount', null, ['label' => 'Closed Issue'])
             ->add('lastCommitDate', null, ['widget' => 'single_text'])
             ->add('commitsCount')
-            ->add('allCommitCount');
+            ->add('allCommitCount', null, ['label' => 'All Commits'])
+            ->add('readme')
+            ->add('license');
     }
 
     /**
@@ -61,15 +63,15 @@ class GithubAdmin extends AbstractAdmin
             ->add('subtitle')
             ->add('url', null, ['label' => 'Repo URL'])
             ->add('ownerName', null, ['label' => 'Name'])
-            ->add('ownerAvatarUrl')
+            ->add('ownerAvatarUrl', null, ['label' => 'Avatar URL'])
             ->add('ownerGithubUrl', null, ['label' => 'Github URL'])
             ->add('starsCount', null, ['label' => 'Number of Stars'])
             ->add('mainLanguage', null, ['label' => 'Primary language'])
-            ->add('openIssueCount')
-            ->add('closedIssuesCount')
+            ->add('openIssueCount', null, ['label' => 'Opened Issue'])
+            ->add('closedIssuesCount', null, ['label' => 'Closed Issue'])
             ->add('lastCommitDate', null, ['widget' => 'single_text'])
             ->add('commitsCount')
-            ->add('allCommitCount');
+            ->add('allCommitCount', null, ['label' => 'All Commits']);
 
     }
 
@@ -79,9 +81,9 @@ class GithubAdmin extends AbstractAdmin
     protected function configureDatagridFilters(DatagridMapper $datagridMapper)
     {
         $datagridMapper
-            ->add('title', null, ['show_filter' => true])
-            ->add('url', null, ['show_filter' => true])
-            ->add('ownerName', null, ['show_filter' => true]);
+            ->add('title', null, ['show_filter' => true, 'label' => 'Repo Name'])
+            ->add('url', null, ['show_filter' => true, 'label' => 'Repo URL'])
+            ->add('ownerName', null, ['show_filter' => true, 'label' => 'Name']);
     }
 
     /**
@@ -90,7 +92,7 @@ class GithubAdmin extends AbstractAdmin
     protected function configureListFields(ListMapper $listMapper)
     {
         $listMapper
-            ->addIdentifier('ownerName', null, ['label' => 'Name'])
+            ->addIdentifier('ownerName', null, ['label' => 'Name', 'route' => ['name' => 'show']])
             ->add('ownerGithubUrl', null, ['label' => 'Github URL'])
             ->add('title', null, ['label' => 'Repo Name'])
             ->add('url', null, ['label' => 'Repo URL'])

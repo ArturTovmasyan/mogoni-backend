@@ -308,7 +308,7 @@ class Github
 
     public function getReadme()
     {
-        return json_decode($this->readme);
+        return $this->readme;
     }
 
     public function setReadme($readme): self
@@ -320,7 +320,7 @@ class Github
 
     public function getLicense()
     {
-        return json_decode($this->license);
+        return $this->license;
     }
 
     public function setLicense($license): self
