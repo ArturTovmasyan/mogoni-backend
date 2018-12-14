@@ -118,8 +118,8 @@ class GithubController extends AbstractController
 
         if (\count($githubData) > 0) {
             $repoData['readme'] = [
-                'url' => $githubData['html_url'],
-                'content' => base64_decode($githubData['content'])
+                'url' => $githubData['html_url'] ?? '',
+                'content' => isset($githubData['content']) ? base64_decode($githubData['content']) : ''
             ];
         }
     }
@@ -135,8 +135,8 @@ class GithubController extends AbstractController
         $githubData = $curlService->callGithubApi($repoLicenseApi);
 
         if (\count($githubData) > 0) {
-            $repoData['license']['url'] = $githubData['html_url'];
-            $repoData['license']['content'] = base64_decode($githubData['content']);
+            $repoData['license']['url'] = $githubData['html_url'] ?? $githubData['documentation_url'] ?? '';
+            $repoData['license']['content'] = isset($githubData['content']) ? base64_decode($githubData['content']) : '';
         }
     }
 
@@ -151,26 +151,20 @@ class GithubController extends AbstractController
         // opened issues count
         $repoOpenedIssuesApi = $this->generateGithubApi(
             $repoUrl,
-            'search/issues?q=repo:%s/%s+type:issue+state:open+created:>'.$date
+            'search/issues?q=repo:%s/%s+type:issue+state:open+created:>' . $date
         );
 
         $githubData = $curlService->callGithubApi($repoOpenedIssuesApi);
-
-        if ($githubData['total_count'] > 0) {
-            $repoData['issues']['opened'] = $githubData['total_count'];
-        }
+        $repoData['issues']['opened'] = $githubData['total_count'] ?? 0;
 
         // closed issues count
         $repoClosedIssuesApi = $this->generateGithubApi(
             $repoUrl,
-            'search/issues?q=repo:%s/%s+type:issue+state:closed+closed:>'.$date
+            'search/issues?q=repo:%s/%s+type:issue+state:closed+closed:>' . $date
         );
 
         $githubData = $curlService->callGithubApi($repoClosedIssuesApi);
-
-        if ($githubData['total_count'] > 0) {
-            $repoData['issues']['closed'] = $githubData['total_count'];
-        }
+        $repoData['issues']['closed'] = $githubData['total_count'] ?? 0;
     }
 
     /**
@@ -181,19 +175,17 @@ class GithubController extends AbstractController
      */
     private function getCommitsInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
     {
-        $repoCommitsApi = $this->generateGithubApi($repoUrl, 'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:>='.$date);
+        $repoCommitsApi = $this->generateGithubApi($repoUrl, 'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:>=' . $date);
         $githubData = $curlService->callGithubApi($repoCommitsApi);
 
-        if ($githubData['total_count'] > 0) {
-            $repoData['commits']['lastDate'] = $githubData['items'][0]['commit']['committer']['date'];
-            $repoData['commits']['last2Month'] = $githubData['total_count'];
-        }
+        $repoData['commits']['lastDate'] = $githubData['items'][0]['commit']['committer']['date'] ?? null;
+        $repoData['commits']['last2Month'] = $githubData['total_count'] ?? 0;
 
         $currentDate = new \DateTime();
-        $currentDate= $currentDate->format('Y-m-d');
+        $currentDate = $currentDate->format('Y-m-d');
 
         $repoCommitsApi = $this->generateGithubApi($repoUrl,
-            'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:<='.$currentDate);
+            'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:<=' . $currentDate);
         $githubData = $curlService->callGithubApi($repoCommitsApi);
 
         if ($githubData['total_count'] > 0) {
@@ -231,7 +223,8 @@ class GithubController extends AbstractController
             $github = new Github();
         }
 
-        $lastCommitDate = new \DateTime($githubData['commits']['lastDate']);
+        // get last commit date and convert to object if exist
+        $lastCommitDate = isset($githubData['commits']['lastDate']) ? new \DateTime($githubData['commits']['lastDate']) : null;
 
         $github->setTitle($githubData['title']);
         $github->setSubtitle($githubData['subtitle']);
@@ -244,10 +237,13 @@ class GithubController extends AbstractController
         $github->setClosedIssuesCount($githubData['issues']['closed']);
         $github->setOpenIssueCount($githubData['issues']['opened']);
         $github->setCommitsCount($githubData['commits']['last2Month']);
-        $github->setLastCommitDate($lastCommitDate);
         $github->setAllCommitCount($githubData['commits']['total']);
         $github->setLicense($githubData['license']);
         $github->setReadme($githubData['readme']);
+
+        if ($lastCommitDate) {
+            $github->setLastCommitDate($lastCommitDate);
+        }
 
         $entityManager->persist($github);
         $entityManager->flush();

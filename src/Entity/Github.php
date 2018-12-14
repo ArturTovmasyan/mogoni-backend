@@ -111,7 +111,7 @@ class Github
     private $closedIssuesCount = 0;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $lastCommitDate;
 
