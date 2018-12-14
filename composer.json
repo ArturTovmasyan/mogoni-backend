@@ -65,6 +65,10 @@
             "@auto-scripts"
         ]
     },
+    "compile": [
+        "rm -rf var/cache/*",
+        "php bin/console d:s:u --force"
+    ],
     "conflict": {
         "symfony/symfony": "*"
     },
