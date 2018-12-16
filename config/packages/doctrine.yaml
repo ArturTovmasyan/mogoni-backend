@@ -30,7 +30,3 @@ stof_doctrine_extensions:
         default:
             timestampable: true
             blameable: true
-
-doctrine_migrations:
-    dir_name: '%kernel.project_dir%/src/Migrations'
-    namespace: DoctrineMigrations

@@ -23,11 +23,16 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.request }
 
-    admin.category:
+    github.repo.admin:
         class: App\Admin\GithubAdmin
         arguments: [~, App\Entity\Github, ~]
         tags:
             - { name: sonata.admin, manager_type: orm, group: Menu, label: Github }
         public: true
 
-
+    github.profile.admin:
+        class: App\Admin\ProfileAdmin
+        arguments: [~, App\Entity\Profile, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: Menu, label: Profile }
+        public: true

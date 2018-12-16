@@ -4,6 +4,7 @@ namespace App\Controller\Rest;
 
 use App\Controller\Exception\Exception;
 use App\Entity\Github;
+use App\Entity\Profile;
 use App\Services\CurlService;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -60,13 +61,42 @@ class GithubController extends AbstractController
     }
 
     /**
+     * This function is used to get user profile data by url
+     *
+     * @Route("/api/v1/profile/data", methods={"POST"}, name="mogoni_github_profile_data")
+     *
+     * @param CurlService $curlService
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @throws
+     */
+    public function getProfileDataAction(CurlService $curlService, Request $request): JsonResponse
+    {
+        $profileData = [];
+
+        try {
+            $profileUrl = $request->get('profileUrl');
+
+            // get repository information from Github API-s
+            $this->getProfileData($profileUrl, $profileData, $curlService);
+            $this->saveProfileData($profileData);
+
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), $e->getCode(), $e->getData() ?? []);
+        }
+
+        return $this->json([$profileData], JsonResponse::HTTP_OK);
+    }
+
+    /**
      * @param $repoUrl
      * @param $repoData
      * @param CurlService $curlService
      */
     private function getGlobalInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
-        $repoInfoApi = $this->generateGithubApi($repoUrl, 'repos/%s/%s');
+        $repoInfoApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s');
         $githubData = $curlService->callGithubApi($repoInfoApi);
         if (\count($githubData) > 0) {
             $repoData = [
@@ -97,7 +127,7 @@ class GithubController extends AbstractController
      */
     private function getLanguageInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
-        $repoLanguageApi = $this->generateGithubApi($repoUrl, 'repos/%s/%s/languages');
+        $repoLanguageApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/languages');
         $githubData = $curlService->callGithubApi($repoLanguageApi);
 
         if (\count($githubData) > 0) {
@@ -113,7 +143,7 @@ class GithubController extends AbstractController
      */
     private function getReadmeInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
-        $repoReadmeApi = $this->generateGithubApi($repoUrl, 'repos/%s/%s/readme');
+        $repoReadmeApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/readme');
         $githubData = $curlService->callGithubApi($repoReadmeApi);
 
         if (\count($githubData) > 0) {
@@ -131,7 +161,7 @@ class GithubController extends AbstractController
      */
     private function getLicenseInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
-        $repoLicenseApi = $this->generateGithubApi($repoUrl, 'repos/%s/%s/license');
+        $repoLicenseApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/license');
         $githubData = $curlService->callGithubApi($repoLicenseApi);
 
         if (\count($githubData) > 0) {
@@ -149,7 +179,7 @@ class GithubController extends AbstractController
     private function getIssuesInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
     {
         // opened issues count
-        $repoOpenedIssuesApi = $this->generateGithubApi(
+        $repoOpenedIssuesApi = $curlService->generateGithubRepoApi(
             $repoUrl,
             'search/issues?q=repo:%s/%s+type:issue+state:open+created:>' . $date
         );
@@ -158,7 +188,7 @@ class GithubController extends AbstractController
         $repoData['issues']['opened'] = $githubData['total_count'] ?? 0;
 
         // closed issues count
-        $repoClosedIssuesApi = $this->generateGithubApi(
+        $repoClosedIssuesApi = $curlService->generateGithubRepoApi(
             $repoUrl,
             'search/issues?q=repo:%s/%s+type:issue+state:closed+closed:>' . $date
         );
@@ -175,35 +205,58 @@ class GithubController extends AbstractController
      */
     private function getCommitsInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
     {
-        $repoCommitsApi = $this->generateGithubApi($repoUrl, 'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:>=' . $date);
+        $repoCommitsApi = $curlService->generateGithubRepoApi($repoUrl, 'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:>=' . $date);
         $githubData = $curlService->callGithubApi($repoCommitsApi);
 
-        $repoData['commits']['lastDate'] = $githubData['items'][0]['commit']['committer']['date'] ?? null;
         $repoData['commits']['last2Month'] = $githubData['total_count'] ?? 0;
 
         $currentDate = new \DateTime();
         $currentDate = $currentDate->format('Y-m-d');
 
-        $repoCommitsApi = $this->generateGithubApi($repoUrl,
+        $repoCommitsApi = $curlService->generateGithubRepoApi($repoUrl,
             'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:<=' . $currentDate);
         $githubData = $curlService->callGithubApi($repoCommitsApi);
 
         if ($githubData['total_count'] > 0) {
             $repoData['commits']['total'] = $githubData['total_count'];
+            $repoData['commits']['lastDate'] = $githubData['items'][0]['commit']['committer']['date'] ?? null;
         }
     }
 
     /**
-     * This functions is used to generate Github API with params
-     *
-     * @param $repoUrl
-     * @param $githubApi
-     * @return string
+     * @param $profileUrl
+     * @param $profileData
+     * @param CurlService $curlService
      */
-    private function generateGithubApi($repoUrl, $githubApi): string
+    private function getProfileData($profileUrl, &$profileData, CurlService $curlService): void
     {
-        $repoUrlData = explode('/', $repoUrl);
-        return sprintf($githubApi, $repoUrlData[3], $repoUrlData[4]);
+        // Github profile info data API
+        $profileDataApi = $curlService->generateProfileDataApi($profileUrl, 'users/%s/repos');
+        $userData = $curlService->callGithubApi($profileDataApi);
+
+        if (\count($userData) > 0) {
+
+            $firstResult = reset($userData);
+
+            // get profile data by request
+            $profileData['username'] = $firstResult['owner']['login'] ?? '';
+            $profileData['avatar_url'] = $firstResult['owner']['avatar_url'] ?? '';
+            $profileData['url'] = $firstResult['owner']['html_url'] ?? '';
+
+            foreach ($userData as $data) {
+
+                $repoUrl = $data['html_url'];
+                // TODO will be use in future
+//                $this->getLanguageInfo($repoUrl, $repoData, $curlService);
+
+                $profileData['repo_lists'][] = [
+//                    'language' => $repoData['language'] ?? '',
+                    'name' => $data['name'],
+                    'url' => $repoUrl
+                ];
+//                $repoData = [];
+            }
+        }
     }
 
     /**
@@ -214,11 +267,10 @@ class GithubController extends AbstractController
         /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
 
-        /** @var Github $existGithubData */
+        /** @var Github $github */
         $github = $entityManager->getRepository(Github::class)->findOneBy(['url' => $githubData['html_url']]);
 
         // create github data
-
         if (!\is_object($github)) {
             $github = new Github();
         }
@@ -246,6 +298,31 @@ class GithubController extends AbstractController
         }
 
         $entityManager->persist($github);
+        $entityManager->flush();
+    }
+
+    /**
+     * @param $profileData
+     */
+    private function saveProfileData($profileData): void
+    {
+        /** @var EntityManager $entityManager */
+        $entityManager = $this->getDoctrine()->getManager();
+
+        /** @var Profile $profile */
+        $profile = $entityManager->getRepository(Profile::class)->findOneBy(['username' => $profileData['username']]);
+
+        // create github data
+        if (!\is_object($profile)) {
+            $profile = new Profile();
+        }
+
+        $profile->setUsername($profileData['username']);
+        $profile->setUrl($profileData['url']);
+        $profile->setAvatarUrl($profileData['avatar_url']);
+        $profile->setRepoList($profileData['repo_lists']);
+
+        $entityManager->persist($profile);
         $entityManager->flush();
     }
 }

@@ -52,4 +52,30 @@ class CurlService
 
         return json_decode($response, true);
     }
+
+    /**
+     * This functions is used to generate Github API with params
+     *
+     * @param $repoUrl
+     * @param $githubApi
+     * @return string
+     */
+    public function generateGithubRepoApi($repoUrl, $githubApi): string
+    {
+        $repoUrlData = explode('/', $repoUrl);
+        return sprintf($githubApi, $repoUrlData[3], $repoUrlData[4]);
+    }
+    /**
+     * This functions is used to generate Github profile data API
+     *
+     * @param $profileUrl
+     * @param $githubApi
+     * @return string
+     */
+    public function generateProfileDataApi($profileUrl, $githubApi): string
+    {
+        $repoUrlData = explode('/', $profileUrl);
+        return sprintf($githubApi, $repoUrlData[3]);
+    }
+
 }

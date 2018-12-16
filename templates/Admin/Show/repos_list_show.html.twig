@@ -1,0 +1,19 @@
+{% extends 'SonataAdminBundle:CRUD:base_show_field.html.twig' %}
+
+{%- block field %}
+    <ul>
+        {% for data in value %}
+            <li>
+                {{ data.name ? data.name : '' }}
+            </li>
+            <li>
+                {{ data.url ? data.url : '' }}
+            </li>
+            <br>
+        {% endfor %}
+    </ul>
+{% endblock -%}
+
+
+
+
