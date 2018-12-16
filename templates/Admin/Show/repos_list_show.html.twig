@@ -4,10 +4,10 @@
     <ul>
         {% for data in value %}
             <li>
-                {{ data.name ? data.name : '' }}
+                <strong>{{ data.name ? data.name : '' }}</strong>
             </li>
             <li>
-                {{ data.url ? data.url : '' }}
+                <a href="{{ data.url ? data.url : '#' }}" target="_blank">{{ data.url ? data.url : '' }}</a>
             </li>
             <br>
         {% endfor %}

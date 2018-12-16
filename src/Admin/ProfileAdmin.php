@@ -31,11 +31,9 @@ class ProfileAdmin extends AbstractAdmin
         $showMapper
             ->add('id')
             ->add('username')
-            ->add('url', null, ['label' => 'Profile URL'])
-            ->add('avatarUrl')
-            ->add('repoList', null, ['label'=>'Repos List',
-                'template' => 'Admin/Show/repos_list_show.html.twig']);
-
+            ->add('url', null, ['label' => 'Profile URL', 'template' => 'Admin/Show/url_show.html.twig'])
+            ->add('avatarUrl', null, ['template' => 'Admin/Show/url_show.html.twig'])
+            ->add('repoList', null, ['label' => 'Repos List', 'template' => 'Admin/Show/repos_list_show.html.twig']);
     }
 
     /**
@@ -44,10 +42,9 @@ class ProfileAdmin extends AbstractAdmin
     protected function configureFormFields(FormMapper $formMapper)
     {
         $formMapper
-              ->add('username')
-              ->add('url', null, ['label' => 'Profile URL'])
-              ->add('avatarUrl');
-
+            ->add('username')
+            ->add('url', null, ['label' => 'Profile URL'])
+            ->add('avatarUrl');
     }
 
     /**
