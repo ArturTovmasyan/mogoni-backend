@@ -217,10 +217,8 @@ class GithubController extends AbstractController
             'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:<=' . $currentDate);
         $githubData = $curlService->callGithubApi($repoCommitsApi);
 
-        if ($githubData['total_count'] > 0) {
-            $repoData['commits']['total'] = $githubData['total_count'];
-            $repoData['commits']['lastDate'] = $githubData['items'][0]['commit']['committer']['date'] ?? null;
-        }
+        $repoData['commits']['total'] = $githubData['total_count'];
+        $repoData['commits']['lastDate'] = $githubData['items'][0]['commit']['committer']['date'] ?? null;
     }
 
     /**
@@ -276,7 +274,7 @@ class GithubController extends AbstractController
         }
 
         // get last commit date and convert to object if exist
-        $lastCommitDate = isset($githubData['commits']['lastDate']) ? new \DateTime($githubData['commits']['lastDate']) : null;
+        $lastCommitDate = isset($githubData['commits']['lastDate']) ? new \DateTime($githubData['commits']['lastDate']) : '';
 
         $github->setTitle($githubData['title']);
         $github->setSubtitle($githubData['subtitle']);
