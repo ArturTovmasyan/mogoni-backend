@@ -21,6 +21,8 @@ use Sonata\AdminBundle\Show\ShowMapper;
  */
 class GithubAdmin extends AbstractAdmin
 {
+    protected $datagridValues = ['_sort_order' => 'DESC'];
+
     /**
      * @param RouteCollection $collection
      */
@@ -38,10 +40,10 @@ class GithubAdmin extends AbstractAdmin
             ->add('id')
             ->add('title', null, ['label' => 'Repo Name'])
             ->add('subtitle')
-            ->add('url', null, ['label' => 'Repo URL'])
+            ->add('url', null, ['label' => 'Repo URL', 'template' => 'Admin/Show/url_show.html.twig'])
             ->add('ownerName', null, ['label' => 'Name'])
-            ->add('ownerAvatarUrl', null, ['label' => 'Avatar URL'])
-            ->add('ownerGithubUrl', null, ['label' => 'Github URL'])
+            ->add('ownerAvatarUrl', null, ['label' => 'Avatar URL', 'template' => 'Admin/Show/url_show.html.twig'])
+            ->add('ownerGithubUrl', null, ['label' => 'Github URL', 'template' => 'Admin/Show/url_show.html.twig'])
             ->add('starsCount', null, ['label' => 'Number of Stars'])
             ->add('mainLanguage', null, ['label' => 'Primary language'])
             ->add('openIssueCount', null, ['label' => 'Opened Issue'])
@@ -72,7 +74,6 @@ class GithubAdmin extends AbstractAdmin
             ->add('lastCommitDate', null, ['widget' => 'single_text'])
             ->add('commitsCount')
             ->add('allCommitCount', null, ['label' => 'All Commits']);
-
     }
 
     /**

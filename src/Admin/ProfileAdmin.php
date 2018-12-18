@@ -15,6 +15,8 @@ use Sonata\AdminBundle\Show\ShowMapper;
  */
 class ProfileAdmin extends AbstractAdmin
 {
+    protected $datagridValues = ['_sort_order' => 'DESC'];
+
     /**
      * @param RouteCollection $collection
      */
@@ -33,6 +35,7 @@ class ProfileAdmin extends AbstractAdmin
             ->add('username')
             ->add('url', null, ['label' => 'Profile URL', 'template' => 'Admin/Show/url_show.html.twig'])
             ->add('avatarUrl', null, ['template' => 'Admin/Show/url_show.html.twig'])
+            ->add('totalCount', null, ['label' => 'Repos Count'])
             ->add('repoList', null, ['label' => 'Repos List', 'template' => 'Admin/Show/repos_list_show.html.twig']);
     }
 
@@ -65,7 +68,7 @@ class ProfileAdmin extends AbstractAdmin
         $listMapper
             ->addIdentifier('username', null, ['label' => 'Username', 'route' => ['name' => 'show']])
             ->add('url', null, ['label' => 'Profile URL'])
-            ->add('getReposCount', null, ['label' => 'Repos Count'])
+            ->add('totalCount', null, ['label' => 'Repos Count'])
             ->add('_action', null, [
                 'actions' => [
                     'show' => [],

@@ -76,9 +76,9 @@ class GithubController extends AbstractController
         $profileData = [];
 
         try {
+            // get repository information from Github API-s
             $profileUrl = $request->get('profileUrl');
 
-            // get repository information from Github API-s
             $this->getProfileData($profileUrl, $profileData, $curlService);
             $this->saveProfileData($profileData);
 
@@ -229,30 +229,62 @@ class GithubController extends AbstractController
     private function getProfileData($profileUrl, &$profileData, CurlService $curlService): void
     {
         // Github profile info data API
-        $profileDataApi = $curlService->generateProfileDataApi($profileUrl, 'users/%s/repos');
+        $profileDataApi = $curlService->generateProfileDataApi($profileUrl, 'search/repositories?q=user:%s&page=%s&per_page=100');
         $userData = $curlService->callGithubApi($profileDataApi);
 
         if (\count($userData) > 0) {
 
-            $firstResult = reset($userData);
+            $pageCount = $userData['total_count'] > 0 ? ceil($userData['total_count'] / 100) : 1;
+            $firstResult = reset($userData['items']);
 
             // get profile data by request
+            $profileData['total_count'] = $userData['total_count'];
             $profileData['username'] = $firstResult['owner']['login'] ?? '';
             $profileData['avatar_url'] = $firstResult['owner']['avatar_url'] ?? '';
             $profileData['url'] = $firstResult['owner']['html_url'] ?? '';
+            $profileData['page_count'] = $pageCount;
 
-            foreach ($userData as $data) {
-
-                $repoUrl = $data['html_url'];
-                // TODO will be use in future
-//                $this->getLanguageInfo($repoUrl, $repoData, $curlService);
+            foreach ($userData['items'] as $data) {
 
                 $profileData['repo_lists'][] = [
-//                    'language' => $repoData['language'] ?? '',
-                    'name' => $data['name'],
-                    'url' => $repoUrl
+                    'language' => $data['language'] ?? '',
+                    'name' => $data['name'] ?? '',
+                    'url' => $data['html_url'] ?? ''
                 ];
-//                $repoData = [];
+            }
+
+            // get user repos by page and save in array
+            $this->getReposByPage($profileData, $profileUrl, $curlService);
+        }
+    }
+
+    /**
+     * NOTE: Github api return maximum 100 result from 1 request, for it we get all repos by page. 100 result for each page
+     *
+     * @param $profileData
+     * @param $profileUrl
+     * @param CurlService $curlService
+     */
+    private function getReposByPage(&$profileData, $profileUrl, $curlService): void
+    {
+        $pageCount = $profileData['page_count'];
+
+        if ($pageCount > 1) {
+
+            for ($i = 2; $i <= $pageCount; $i++) {
+
+                // Github profile info data API
+                $profileDataApi = $curlService->generateProfileDataApi($profileUrl, 'search/repositories?q=user:%s&page=%s&per_page=100', $i);
+                $userData = $curlService->callGithubApi($profileDataApi);
+
+                foreach ($userData['items'] as $data) {
+
+                    $profileData['repo_lists'][] = [
+                        'language' => $data['language'] ?? '',
+                        'name' => $data['name'] ?? '',
+                        'url' => $data['html_url'] ?? ''
+                    ];
+                }
             }
         }
     }
@@ -317,6 +349,7 @@ class GithubController extends AbstractController
 
         $profile->setUsername($profileData['username']);
         $profile->setUrl($profileData['url']);
+        $profile->setTotalCount($profileData['total_count']);
         $profile->setAvatarUrl($profileData['avatar_url']);
         $profile->setRepoList($profileData['repo_lists']);
 

@@ -63,6 +63,7 @@ class CurlService
     public function generateGithubRepoApi($repoUrl, $githubApi): string
     {
         $repoUrlData = explode('/', $repoUrl);
+
         return sprintf($githubApi, $repoUrlData[3], $repoUrlData[4]);
     }
     /**
@@ -70,12 +71,13 @@ class CurlService
      *
      * @param $profileUrl
      * @param $githubApi
+     * @param $page
      * @return string
      */
-    public function generateProfileDataApi($profileUrl, $githubApi): string
+    public function generateProfileDataApi($profileUrl, $githubApi, $page = 1): string
     {
         $repoUrlData = explode('/', $profileUrl);
-        return sprintf($githubApi, $repoUrlData[3]);
-    }
 
+        return sprintf($githubApi, $repoUrlData[3], $page);
+    }
 }

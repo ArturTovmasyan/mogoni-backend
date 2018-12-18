@@ -41,6 +41,11 @@ class Profile
     private $avatarUrl;
 
     /**
+     * @ORM\Column(name="total_count", type="integer")
+     */
+    private $totalCount = 0;
+
+    /**
      * @ORM\Column(type="array", nullable=true)
      */
     private $repoList = [];
@@ -106,11 +111,15 @@ class Profile
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getReposCount(): int
+    public function getTotalCount(): ?int
     {
-        return \count($this->getRepoList());
+        return $this->totalCount;
+    }
+
+    public function setTotalCount(int $totalCount): self
+    {
+        $this->totalCount = $totalCount;
+
+        return $this;
     }
 }

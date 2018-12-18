@@ -3,12 +3,25 @@
 {%- block field %}
     <ul>
         {% for data in value %}
-            <li>
-                <strong>{{ data.name ? data.name : '' }}</strong>
-            </li>
-            <li>
-                <a href="{{ data.url ? data.url : '#' }}" target="_blank">{{ data.url ? data.url : '' }}</a>
-            </li>
+
+            {% if data.name %}
+                <li>
+                    {{ data.name }}
+                </li>
+            {% endif %}
+
+            {% if data.language %}
+                <li>
+                    {{ data.language }}
+                </li>
+            {% endif %}
+
+            {% if data.url %}
+                <li>
+                    <a href="{{ data.url }}" target="_blank">{{ data.url }}</a>
+                </li>
+            {% endif %}
+
             <br>
         {% endfor %}
     </ul>
