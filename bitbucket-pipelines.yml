@@ -1,0 +1,41 @@
+image: php:7.1.1
+
+pipelines:
+  custom: # Pipelines that can only be triggered manually
+    default:
+      - step:
+          name: Deploy to dev
+          caches:
+            - composer
+          deployment: test
+          script:
+            - apt-get update && apt-get install -y unzip git
+            - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME_DEV.git HEAD:master -f
+  branches:
+    develop:
+      - step:
+          name: Deploy to test
+          caches:
+            - composer
+          deployment: test
+          script:
+            - apt-get update && apt-get install -y unzip git
+            - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME_TEST.git HEAD:master
+    release/*:
+       - step:
+          name: Deploy to Staging
+          caches:
+            - composer
+          deployment: staging
+          script:
+            - apt-get update && apt-get install -y unzip git
+            - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME_STAGING.git HEAD:master
+    master:
+      - step:
+          name: Deploy to Production
+          caches:
+            - composer
+          deployment: production
+          script:
+            - apt-get update && apt-get install -y unzip git
+            - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME_TEST.git HEAD:master

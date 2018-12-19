@@ -11,23 +11,20 @@ use App\Controller\Exception\Exception;
 class CurlService
 {
     /**
-     * This function is used to check request required params
+     * This function is used to call github API
      *
-     * @param $urlParams
+     * @param $githubUrl
      * @return array|string
      * @throws Exception
      */
-    public function callGithubCurl($urlParams)
+    public function callGithubApi($githubUrl)
     {
-        //get auth parameters for get access token
-        $github_api_domain = getenv('GITHUB_API_DOMAIN');
-
         //start curl
         $curl = curl_init();
 
         //generate curl body for get token
         curl_setopt_array($curl, [
-            CURLOPT_URL => $github_api_domain . $urlParams,
+            CURLOPT_URL => getenv('GITHUB_API_DOMAIN') . $githubUrl,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -36,7 +33,8 @@ class CurlService
             CURLOPT_USERAGENT => 'curl/' . curl_version()['version'],
             CURLOPT_CUSTOMREQUEST => 'GET',
             CURLOPT_HTTPHEADER => [
-                'Authorization: token '.getenv('GITHUB_TOKEN'),
+                'Authorization: token ' . getenv('GITHUB_TOKEN'),
+                'Accept: application/vnd.github.cloak-preview',
                 'content-type: application/json'
             ],
         ]);
@@ -53,5 +51,33 @@ class CurlService
         }
 
         return json_decode($response, true);
+    }
+
+    /**
+     * This functions is used to generate Github API with params
+     *
+     * @param $repoUrl
+     * @param $githubApi
+     * @return string
+     */
+    public function generateGithubRepoApi($repoUrl, $githubApi): string
+    {
+        $repoUrlData = explode('/', $repoUrl);
+
+        return sprintf($githubApi, $repoUrlData[3], $repoUrlData[4]);
+    }
+    /**
+     * This functions is used to generate Github profile data API
+     *
+     * @param $profileUrl
+     * @param $githubApi
+     * @param $page
+     * @return string
+     */
+    public function generateProfileDataApi($profileUrl, $githubApi, $page = 1): string
+    {
+        $repoUrlData = explode('/', $profileUrl);
+
+        return sprintf($githubApi, $repoUrlData[3], $page);
     }
 }

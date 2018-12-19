@@ -1,0 +1,32 @@
+{% extends 'SonataAdminBundle:CRUD:base_show_field.html.twig' %}
+
+{%- block field %}
+    <ul>
+        {% for data in value %}
+
+            {% if data.name %}
+                <li>
+                    {{ data.name }}
+                </li>
+            {% endif %}
+
+            {% if data.language %}
+                <li>
+                    {{ data.language }}
+                </li>
+            {% endif %}
+
+            {% if data.url %}
+                <li>
+                    <a href="{{ data.url }}" target="_blank">{{ data.url }}</a>
+                </li>
+            {% endif %}
+
+            <br>
+        {% endfor %}
+    </ul>
+{% endblock -%}
+
+
+
+

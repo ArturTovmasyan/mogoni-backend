@@ -1,0 +1,9 @@
+{% extends 'SonataAdminBundle:CRUD:base_show_field.html.twig' %}
+
+{%- block field %}
+    <a href="{{ value ? value : '#' }}" target="_blank">{{ value ? value : '' }}</a>
+{% endblock -%}
+
+
+
+
