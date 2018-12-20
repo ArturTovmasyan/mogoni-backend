@@ -23,6 +23,7 @@ class ProfileAdmin extends AbstractAdmin
     public function configureRoutes(RouteCollection $collection)
     {
         $collection->remove('export');
+        $collection->remove('create');
     }
 
     /**

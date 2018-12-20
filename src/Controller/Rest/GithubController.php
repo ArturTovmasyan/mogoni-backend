@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class GithubController extends AbstractController
 {
     /**
-     * This function is used to get Repo data by github API
+     * This function is used to get and save Repo data by github API
      *
      * @Route("/api/v1/repo/data", methods={"POST"}, name="mogoni_github_repo_data")
      *
@@ -33,13 +33,22 @@ class GithubController extends AbstractController
     {
         $repoData = [];
 
-        try {
-            // get last 2 month date
-            $date = date('Y-m-d', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))) . '-2 month'));
-            $repoUrl = $request->get('repoUrl');
+        // get last 2 month date
+        $date = date('Y-m-d', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))) . '-2 month'));
+        $repoUrl = $request->get('repoUrl');
 
-            // get repository information from Github API-s
-            $this->getGlobalInfo($repoUrl, $repoData, $curlService);
+        // regex for github repo url
+        $repoRegex = '/^https?:\/\/github.com\/([a-zA-Z0-9-_]*)+\/([a-zA-Z0-9-_])+$/';
+
+        if (!preg_match($repoRegex, $repoUrl)) {
+            throw new Exception('Invalid Github repository url', JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // get repository information from Github API-s
+        $this->getGlobalInfo($repoUrl, $repoData, $curlService);
+
+        // check if data exist save it in DB
+        if (\count($repoData) > 0) {
 
             $this->getLanguageInfo($repoUrl, $repoData, $curlService);
 
@@ -52,9 +61,6 @@ class GithubController extends AbstractController
             $this->getLicenseInfo($repoUrl, $repoData, $curlService);
 
             $this->saveGithubData($repoData);
-
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e->getData() ?? []);
         }
 
         return $this->json([$repoData], JsonResponse::HTTP_OK);
@@ -71,19 +77,26 @@ class GithubController extends AbstractController
      * @return JsonResponse
      * @throws
      */
-    public function getProfileDataAction(CurlService $curlService, Request $request): JsonResponse
+    public
+    function getProfileDataAction(CurlService $curlService, Request $request): JsonResponse
     {
         $profileData = [];
 
-        try {
-            // get repository information from Github API-s
-            $profileUrl = $request->get('profileUrl');
+        // get repository information from Github API-s
+        $profileUrl = $request->get('profileUrl');
 
-            $this->getProfileData($profileUrl, $profileData, $curlService);
+        // regex for github profile url
+        $profileRegex = '/^https?:\/\/github.com\/([a-zA-Z0-9-_]*)$/';
+
+        if (!preg_match($profileRegex, $profileUrl)) {
+            throw new Exception('Invalid Github profile url', JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $this->getProfileData($profileUrl, $profileData, $curlService);
+
+        // check if data exist save it in DB
+        if (\count($profileData) > 0) {
             $this->saveProfileData($profileData);
-
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e->getData() ?? []);
         }
 
         return $this->json([$profileData], JsonResponse::HTTP_OK);
@@ -94,10 +107,12 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private function getGlobalInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private
+    function getGlobalInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoInfoApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s');
         $githubData = $curlService->callGithubApi($repoInfoApi);
+
         if (\count($githubData) > 0) {
             $repoData = [
                 'title' => explode('/', $githubData['name'])[0],
@@ -115,7 +130,6 @@ class GithubController extends AbstractController
                     'spdx_id' => $githubData['license']['spdx_id'],
                     'url' => $githubData['license']['url'],
                 ]
-
             ];
         }
     }
@@ -125,15 +139,14 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private function getLanguageInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private
+    function getLanguageInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoLanguageApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/languages');
         $githubData = $curlService->callGithubApi($repoLanguageApi);
 
-        if (\count($githubData) > 0) {
-            $language = array_keys($githubData);
-            $repoData['language'] = reset($language);
-        }
+        $language = \count($githubData) > 0 ? array_keys($githubData)[0] : '';
+        $repoData['language'] = $language;
     }
 
     /**
@@ -141,7 +154,8 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private function getReadmeInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private
+    function getReadmeInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoReadmeApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/readme');
         $githubData = $curlService->callGithubApi($repoReadmeApi);
@@ -159,7 +173,8 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private function getLicenseInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private
+    function getLicenseInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoLicenseApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/license');
         $githubData = $curlService->callGithubApi($repoLicenseApi);
@@ -176,7 +191,8 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private function getIssuesInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
+    private
+    function getIssuesInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
     {
         // opened issues count
         $repoOpenedIssuesApi = $curlService->generateGithubRepoApi(
@@ -203,7 +219,8 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private function getCommitsInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
+    private
+    function getCommitsInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
     {
         $repoCommitsApi = $curlService->generateGithubRepoApi($repoUrl, 'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:>=' . $date);
         $githubData = $curlService->callGithubApi($repoCommitsApi);
@@ -226,7 +243,8 @@ class GithubController extends AbstractController
      * @param $profileData
      * @param CurlService $curlService
      */
-    private function getProfileData($profileUrl, &$profileData, CurlService $curlService): void
+    private
+    function getProfileData($profileUrl, &$profileData, CurlService $curlService): void
     {
         // Github profile info data API
         $profileDataApi = $curlService->generateProfileDataApi($profileUrl, 'search/repositories?q=user:%s&page=%s&per_page=100');
@@ -265,7 +283,8 @@ class GithubController extends AbstractController
      * @param $profileUrl
      * @param CurlService $curlService
      */
-    private function getReposByPage(&$profileData, $profileUrl, $curlService): void
+    private
+    function getReposByPage(&$profileData, $profileUrl, $curlService): void
     {
         $pageCount = $profileData['page_count'];
 
@@ -292,7 +311,8 @@ class GithubController extends AbstractController
     /**
      * @param $githubData
      */
-    private function saveGithubData($githubData): void
+    private
+    function saveGithubData($githubData): void
     {
         /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
@@ -334,7 +354,8 @@ class GithubController extends AbstractController
     /**
      * @param $profileData
      */
-    private function saveProfileData($profileData): void
+    private
+    function saveProfileData($profileData): void
     {
         /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
