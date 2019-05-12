@@ -302,7 +302,7 @@ class GithubController extends AbstractController
     /**
      * @param $githubData
      */
-    private function saveGithubData($githubData): void
+    private function saveGithubData(&$githubData): void
     {
         /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
@@ -319,19 +319,19 @@ class GithubController extends AbstractController
         $lastCommitDate = isset($githubData['commits']['lastDate']) ? new \DateTime($githubData['commits']['lastDate']) : '';
 
         $github->setTitle($githubData['title']);
-        $github->setSubtitle(isset($githubData['subtitle']) ?? '');
-        $github->setUrl(isset($githubData['html_url']) ?? '');
-        $github->setStarsCount(isset($githubData['star']) ?? 0);
-        $github->setOwnerName(isset($githubData['owner']['name']) ?? '');
-        $github->setMainLanguage(isset($githubData['language']) ?? '');
-        $github->setOwnerAvatarUrl(isset($githubData['owner']['avatar_url']) ?? '');
-        $github->setOwnerGithubUrl(isset($githubData['owner']['html_url']) ?? '');
-        $github->setClosedIssuesCount(isset($githubData['issues']['closed']) ?? '');
-        $github->setOpenIssueCount(isset($githubData['issues']['opened']) ?? '');
-        $github->setCommitsCount(isset($githubData['commits']['last2Month']) ?? '');
-        $github->setAllCommitCount(isset($githubData['commits']['total']) ?? '');
-        $github->setLicense(isset($githubData['license']) ?? '');
-        $github->setReadme(isset($githubData['readme']) ?? '');
+        $github->setSubtitle($githubData['subtitle'] ?? '');
+        $github->setUrl($githubData['html_url'] ?? '');
+        $github->setStarsCount($githubData['star'] ?? 0);
+        $github->setOwnerName($githubData['owner']['name'] ?? '');
+        $github->setMainLanguage($githubData['language'] ?? '');
+        $github->setOwnerAvatarUrl($githubData['owner']['avatar_url'] ?? '');
+        $github->setOwnerGithubUrl($githubData['owner']['html_url'] ?? '');
+        $github->setClosedIssuesCount($githubData['issues']['closed'] ?? '');
+        $github->setOpenIssueCount($githubData['issues']['opened'] ?? '');
+        $github->setCommitsCount($githubData['commits']['last2Month'] ?? '');
+        $github->setAllCommitCount($githubData['commits']['total'] ?? '');
+        $github->setLicense($githubData['license'] ?? '');
+        $github->setReadme($githubData['readme'] ?? '');
 
         if ($lastCommitDate) {
             $github->setLastCommitDate($lastCommitDate);
@@ -339,6 +339,7 @@ class GithubController extends AbstractController
 
         $entityManager->persist($github);
         $entityManager->flush();
+        $githubData['id'] = $github->getId();
     }
 
     /**
