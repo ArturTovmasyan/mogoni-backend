@@ -61,7 +61,7 @@ class MogoniController extends AbstractController
             $product->setContact($requestData['contact'] ?? '');
             $product->setScreenshot($requestData['screenshot'] ?? array());
             $product->setInstallation($requestData['installation'] ?? array());
-            $product->setUsag($requestData['usage'] ?? array());
+            $product->setExample($requestData['example'] ?? array());
 
             // check data validation and save it
             $validateService->checkValidation($product);

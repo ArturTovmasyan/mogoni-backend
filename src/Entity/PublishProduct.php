@@ -72,7 +72,7 @@ class PublishProduct
     /**
      * @ORM\Column(type="string", length=2000)
      */
-    private $usag;
+    private $example;
 
     /**
      * @var Github
@@ -126,18 +126,6 @@ class PublishProduct
     public function setInstallation($installation): self
     {
         $this->installation = json_encode($installation);
-
-        return $this;
-    }
-
-    public function getUsag()
-    {
-        return json_decode($this->usag, true);
-    }
-
-    public function setUsag($usag): self
-    {
-        $this->usag = json_encode($usag);
 
         return $this;
     }
@@ -222,6 +210,18 @@ class PublishProduct
     public function setAuthorName(string $authorName): self
     {
         $this->authorName = $authorName;
+
+        return $this;
+    }
+
+    public function getExample()
+    {
+        return json_decode($this->example, true);
+    }
+
+    public function setExample($example): self
+    {
+        $this->example = json_encode($example);
 
         return $this;
     }
