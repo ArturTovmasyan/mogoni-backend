@@ -19,7 +19,7 @@ use Sonata\AdminBundle\Show\ShowMapper;
  * Class GithubAdmin
  * @package App\Admin
  */
-class GithubAdmin extends AbstractAdmin
+final class GithubAdmin extends AbstractAdmin
 {
     protected $datagridValues = ['_sort_order' => 'DESC'];
 

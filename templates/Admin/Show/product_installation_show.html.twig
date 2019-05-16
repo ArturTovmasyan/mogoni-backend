@@ -1,0 +1,25 @@
+{% extends 'SonataAdminBundle:CRUD:base_show_field.html.twig' %}
+
+{%- block field %}
+    <ul>
+        {% for data in value %}
+
+            {% if data.title %}
+                <li>
+                    {{ data.title }}
+                </li>
+            {% endif %}
+
+            {% if data.description %}
+                <li>
+                    {{ data.description }}
+                </li>
+            {% endif %}
+            <br>
+        {% endfor %}
+    </ul>
+{% endblock -%}
+
+
+
+

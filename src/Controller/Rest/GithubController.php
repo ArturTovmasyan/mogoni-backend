@@ -77,8 +77,7 @@ class GithubController extends AbstractController
      * @return JsonResponse
      * @throws
      */
-    public
-    function getProfileDataAction(CurlService $curlService, Request $request): JsonResponse
+    public function getProfileDataAction(CurlService $curlService, Request $request): JsonResponse
     {
         $profileData = [];
 
@@ -107,15 +106,14 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private
-    function getGlobalInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private function getGlobalInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoInfoApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s');
         $githubData = $curlService->callGithubApi($repoInfoApi);
 
         if (\count($githubData) > 0) {
             $repoData = [
-                'title' => explode('/', $githubData['name'])[0],
+                'title' => $githubData['name'],
                 'subtitle' => $githubData['description'],
                 'html_url' => $githubData['html_url'],
                 'star' => $githubData['stargazers_count'],
@@ -139,8 +137,7 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private
-    function getLanguageInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private function getLanguageInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoLanguageApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/languages');
         $githubData = $curlService->callGithubApi($repoLanguageApi);
@@ -154,8 +151,7 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private
-    function getReadmeInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private function getReadmeInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoReadmeApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/readme');
         $githubData = $curlService->callGithubApi($repoReadmeApi);
@@ -173,8 +169,7 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private
-    function getLicenseInfo($repoUrl, &$repoData, CurlService $curlService): void
+    private function getLicenseInfo($repoUrl, &$repoData, CurlService $curlService): void
     {
         $repoLicenseApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/license');
         $githubData = $curlService->callGithubApi($repoLicenseApi);
@@ -191,8 +186,7 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private
-    function getIssuesInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
+    private function getIssuesInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
     {
         // opened issues count
         $repoOpenedIssuesApi = $curlService->generateGithubRepoApi(
@@ -219,8 +213,7 @@ class GithubController extends AbstractController
      * @param $repoData
      * @param CurlService $curlService
      */
-    private
-    function getCommitsInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
+    private function getCommitsInfo($repoUrl, $date, &$repoData, CurlService $curlService): void
     {
         $repoCommitsApi = $curlService->generateGithubRepoApi($repoUrl, 'search/commits?q=repo:%s/%s+sort:committer-date+committer-date:>=' . $date);
         $githubData = $curlService->callGithubApi($repoCommitsApi);
@@ -243,8 +236,7 @@ class GithubController extends AbstractController
      * @param $profileData
      * @param CurlService $curlService
      */
-    private
-    function getProfileData($profileUrl, &$profileData, CurlService $curlService): void
+    private function getProfileData($profileUrl, &$profileData, CurlService $curlService): void
     {
         // Github profile info data API
         $profileDataApi = $curlService->generateProfileDataApi($profileUrl, 'search/repositories?q=user:%s&page=%s&per_page=100');
@@ -283,8 +275,7 @@ class GithubController extends AbstractController
      * @param $profileUrl
      * @param CurlService $curlService
      */
-    private
-    function getReposByPage(&$profileData, $profileUrl, $curlService): void
+    private function getReposByPage(&$profileData, $profileUrl, $curlService): void
     {
         $pageCount = $profileData['page_count'];
 
@@ -311,8 +302,7 @@ class GithubController extends AbstractController
     /**
      * @param $githubData
      */
-    private
-    function saveGithubData($githubData): void
+    private function saveGithubData(&$githubData): void
     {
         /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
@@ -329,19 +319,19 @@ class GithubController extends AbstractController
         $lastCommitDate = isset($githubData['commits']['lastDate']) ? new \DateTime($githubData['commits']['lastDate']) : '';
 
         $github->setTitle($githubData['title']);
-        $github->setSubtitle($githubData['subtitle']);
-        $github->setUrl($githubData['html_url']);
-        $github->setStarsCount($githubData['star']);
-        $github->setOwnerName($githubData['owner']['name']);
-        $github->setMainLanguage($githubData['language']);
-        $github->setOwnerAvatarUrl($githubData['owner']['avatar_url']);
-        $github->setOwnerGithubUrl($githubData['owner']['html_url']);
-        $github->setClosedIssuesCount($githubData['issues']['closed']);
-        $github->setOpenIssueCount($githubData['issues']['opened']);
-        $github->setCommitsCount($githubData['commits']['last2Month']);
-        $github->setAllCommitCount($githubData['commits']['total']);
-        $github->setLicense($githubData['license']);
-        $github->setReadme($githubData['readme']);
+        $github->setSubtitle($githubData['subtitle'] ?? '');
+        $github->setUrl($githubData['html_url'] ?? '');
+        $github->setStarsCount($githubData['star'] ?? 0);
+        $github->setOwnerName($githubData['owner']['name'] ?? '');
+        $github->setMainLanguage($githubData['language'] ?? '');
+        $github->setOwnerAvatarUrl($githubData['owner']['avatar_url'] ?? '');
+        $github->setOwnerGithubUrl($githubData['owner']['html_url'] ?? '');
+        $github->setClosedIssuesCount($githubData['issues']['closed'] ?? '');
+        $github->setOpenIssueCount($githubData['issues']['opened'] ?? '');
+        $github->setCommitsCount($githubData['commits']['last2Month'] ?? '');
+        $github->setAllCommitCount($githubData['commits']['total'] ?? '');
+        $github->setLicense($githubData['license'] ?? '');
+        $github->setReadme($githubData['readme'] ?? '');
 
         if ($lastCommitDate) {
             $github->setLastCommitDate($lastCommitDate);
@@ -349,13 +339,13 @@ class GithubController extends AbstractController
 
         $entityManager->persist($github);
         $entityManager->flush();
+        $githubData['id'] = $github->getId();
     }
 
     /**
      * @param $profileData
      */
-    private
-    function saveProfileData($profileData): void
+    private function saveProfileData($profileData): void
     {
         /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();

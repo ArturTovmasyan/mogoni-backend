@@ -5,6 +5,10 @@ namespace App\EventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
+/**
+ * Class ExceptionListener
+ * @package App\EventListener
+ */
 class ExceptionListener
 {
     /**
