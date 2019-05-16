@@ -1,0 +1,25 @@
+{% extends 'SonataAdminBundle:CRUD:base_show_field.html.twig' %}
+
+{%- block field %}
+    <ul>
+        {% for data in value %}
+
+            {% if data.title %}
+                <li>
+                    {{ data.title }}
+                </li>
+            {% endif %}
+
+            {% if data.image_url %}
+                <li>
+                  <img src="{{ data.image_url }}"  width="90px" height="90px" />
+                </li>
+            {% endif %}
+            <br>
+        {% endfor %}
+    </ul>
+{% endblock -%}
+
+
+
+

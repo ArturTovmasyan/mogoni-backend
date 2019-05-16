@@ -89,6 +89,14 @@ class PublishProduct
      */
     private $contact;
 
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return (string)$this->getId();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
