@@ -47,7 +47,6 @@ final class PublishProductAdmin extends AbstractAdmin
         $listMapper
 			->add('id')
 			->add('title')
-			->add('description')
 			->add('authorName')
 			->add('repoName')
 			->add('goal')
