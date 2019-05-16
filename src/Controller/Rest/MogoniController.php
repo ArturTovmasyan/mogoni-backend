@@ -7,6 +7,8 @@ use App\Entity\Github;
 use App\Entity\PublishProduct;
 use App\Services\ValidateService;
 use Doctrine\ORM\EntityManager;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -82,5 +84,42 @@ class MogoniController extends AbstractController
         $uniqueUrl = sprintf($uniqueUrl, $product->getId(), str_replace(' ', '_', $requestData['author_name']),  str_replace(' ', '_', $requestData['repo_name']));
 
         return $this->json(['status' => JsonResponse::HTTP_CREATED, 'data' => ['unique_url' => $uniqueUrl]], JsonResponse::HTTP_CREATED);
+    }
+
+    /**
+     * This function is used to save published product
+     *
+     * @Route("/api/v1/publish/product/{id}", methods={"GET"}, name="mogoni_get_publish_product", requirements={"id"="\d+"})
+     *
+     * @param int $id
+     * @param SerializerInterface $serializer
+     *
+     * @return JsonResponse
+     * @throws
+     */
+    public function getPublishProductAction(int $id, SerializerInterface $serializer): JsonResponse
+    {
+        /** @var EntityManager $entityManager */
+        $entityManager = $this->getDoctrine()->getManager();
+
+        /** @var PublishProduct $product */
+        $product = $entityManager->getRepository(PublishProduct::class)->find($id);
+
+        // generate filters data body
+        $userContent = $serializer->serialize($product, 'json', SerializationContext::create()->setGroups(['publish']));
+        $decodeData = json_decode($userContent, true);
+
+        // Decode json string fields
+        $decodeData['example'] = json_decode($decodeData['example'], true);
+        $decodeData['installation'] = json_decode($decodeData['installation'], true);
+        $decodeData['screenshot'] = json_decode($decodeData['screenshot'], true);
+        $decodeData['github']['license'] = json_decode($decodeData['github']['license'], true);
+        $userContent = json_encode($decodeData);
+
+        // generate JsonResponse
+        $response = new JsonResponse();
+        $response->setContent($userContent);
+
+        return $response;
     }
 }

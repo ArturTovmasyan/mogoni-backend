@@ -6,6 +6,7 @@ use App\Entity\Traits\TimeAwareTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\PublishProductRepository")
@@ -24,16 +25,19 @@ class PublishProduct
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Serializer\Groups({"publish"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Serializer\Groups({"publish"})
      */
     private $title;
 
     /**
      * @ORM\Column(type="string", length=500, nullable=true)
+     * @Serializer\Groups({"publish"})
      */
     private $description;
 
@@ -51,28 +55,39 @@ class PublishProduct
 
     /**
      * @ORM\Column(type="string", length=500, nullable=true)
+     * @Serializer\Groups({"publish"})
      */
     private $goal;
 
     /**
      * @ORM\Column(type="string", length=500, nullable=true)
+     * @Serializer\Groups({"publish"})
      */
     private $roadmap;
 
     /**
      * @ORM\Column(type="string", length=2000)
+     * @Serializer\Groups({"publish"})
      */
     private $screenshot;
 
     /**
      * @ORM\Column(type="string", length=2000)
+     * @Serializer\Groups({"publish"})
      */
     private $installation;
 
     /**
      * @ORM\Column(type="string", length=2000)
+     * @Serializer\Groups({"publish"})
      */
     private $example;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Serializer\Groups({"publish"})
+     */
+    private $contact;
 
     /**
      * @var Github
@@ -81,13 +96,9 @@ class PublishProduct
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="id_github", referencedColumnName="id", nullable=false)
      * })
+     * @Serializer\Groups({"publish"})
      */
     private $github;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $contact;
 
     /**
      * @return string

@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\TimeAwareTrait;
 use Symfony\Component\Validator\Constraints as Assert;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\GithubRepository")
@@ -48,6 +49,7 @@ class Github
      *      max = 100,
      *      maxMessage = "Url cannot be longer than {{ limit }} characters"
      * )
+     * @Serializer\Groups({"publish"})
      */
     private $url;
 
@@ -58,6 +60,7 @@ class Github
      *      max = 20,
      *      maxMessage = "Url cannot be longer than {{ limit }} characters"
      * )
+     * @Serializer\Groups({"publish"})
      */
     private $ownerName;
 
@@ -84,7 +87,7 @@ class Github
     /**
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
-     *
+     * @Serializer\Groups({"publish"})
      */
     private $starsCount = 0;
 
@@ -95,18 +98,21 @@ class Github
      *      max = 20,
      *      maxMessage = "Language cannot be longer than {{ limit }} characters"
      * )
+     * @Serializer\Groups({"publish"})
      */
     private $mainLanguage;
 
     /**
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
+     * @Serializer\Groups({"publish"})
      */
     private $openIssueCount = 0;
 
     /**
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
+     * @Serializer\Groups({"publish"})
      */
     private $closedIssuesCount = 0;
 
@@ -134,6 +140,7 @@ class Github
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Serializer\Groups({"publish"})
      */
     private $license;
 
@@ -308,7 +315,7 @@ class Github
 
     public function getReadme()
     {
-        return $this->readme;
+        return json_decode($this->readme, true);
     }
 
     public function setReadme($readme): self
@@ -320,7 +327,7 @@ class Github
 
     public function getLicense()
     {
-        return $this->license;
+        return json_decode($this->license, true);
     }
 
     public function setLicense($license): self
