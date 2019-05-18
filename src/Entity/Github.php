@@ -29,6 +29,7 @@ class Github
      *      max = 50,
      *      maxMessage = "Title cannot be longer than {{ limit }} characters"
      * )
+     * @Serializer\Groups({"publish"})
      */
     private $title;
 
@@ -118,18 +119,21 @@ class Github
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
+     * @Serializer\Groups({"publish"})
      */
     private $lastCommitDate;
 
     /**
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
+     * @Serializer\Groups({"publish"})
      */
     private $commitsCount = 0;
 
     /**
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
+     * @Serializer\Groups({"publish"})
      */
     private $allCommitCount = 0;
 

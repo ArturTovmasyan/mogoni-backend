@@ -69,19 +69,19 @@ class PublishProduct
      * @ORM\Column(type="string", length=2000)
      * @Serializer\Groups({"publish"})
      */
-    private $screenshot;
+    private $screenshots;
 
     /**
      * @ORM\Column(type="string", length=2000)
      * @Serializer\Groups({"publish"})
      */
-    private $installation;
+    private $installations;
 
     /**
      * @ORM\Column(type="string", length=2000)
      * @Serializer\Groups({"publish"})
      */
-    private $example;
+    private $examples;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -137,14 +137,14 @@ class PublishProduct
         return $this;
     }
 
-    public function getInstallation()
+    public function getInstallations()
     {
-        return json_decode($this->installation, true);
+        return json_decode($this->installations, true);
     }
 
-    public function setInstallation($installation): self
+    public function setInstallations($installations): self
     {
-        $this->installation = json_encode($installation);
+        $this->installations = json_encode($installations);
 
         return $this;
     }
@@ -173,14 +173,14 @@ class PublishProduct
         return $this;
     }
 
-    public function getScreenshot()
+    public function getScreenshots()
     {
-        return json_decode($this->screenshot, true);
+        return json_decode($this->screenshots, true);
     }
 
-    public function setScreenshot($screenshot): self
+    public function setScreenshots($screenshots): self
     {
-        $this->screenshot = json_encode($screenshot);
+        $this->screenshots = json_encode($screenshots);
 
         return $this;
     }
@@ -233,14 +233,14 @@ class PublishProduct
         return $this;
     }
 
-    public function getExample()
+    public function getExamples()
     {
-        return json_decode($this->example, true);
+        return json_decode($this->examples, true);
     }
 
-    public function setExample($example): self
+    public function setExamples($examples): self
     {
-        $this->example = json_encode($example);
+        $this->examples = json_encode($examples);
 
         return $this;
     }

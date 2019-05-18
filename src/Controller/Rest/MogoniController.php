@@ -61,9 +61,9 @@ class MogoniController extends AbstractController
             $product->setGoal($requestData['goal'] ?? '');
             $product->setRoadmap($requestData['roadmap'] ?? '');
             $product->setContact($requestData['contact'] ?? '');
-            $product->setScreenshot($requestData['screenshots'] ?? array());
-            $product->setExample($requestData['examples'] ?? array());
-            $product->setInstallation($requestData['installation'] ?? array());
+            $product->setScreenshots($requestData['screenshots'] ?? array());
+            $product->setExamples($requestData['examples'] ?? array());
+            $product->setInstallations($requestData['installations'] ?? array());
 
             // check data validation and save it
             $validateService->checkValidation($product);
@@ -83,7 +83,15 @@ class MogoniController extends AbstractController
         $uniqueUrl = $webHost.'/published-repo/%s/%s/%s';
         $uniqueUrl = sprintf($uniqueUrl, $product->getId(), str_replace(' ', '_', $requestData['author_name']),  str_replace(' ', '_', $requestData['repo_name']));
 
-        return $this->json(['status' => JsonResponse::HTTP_CREATED, 'data' => ['unique_url' => $uniqueUrl]], JsonResponse::HTTP_CREATED);
+        // generate response data
+        $response = [
+            'id' => $product->getId(),
+            'author_name' => $requestData['author_name'],
+            'repo_name' => $requestData['repo_name'],
+            'unique_url' => $uniqueUrl
+        ];
+
+        return $this->json(['status' => JsonResponse::HTTP_CREATED, 'data' => $response], JsonResponse::HTTP_CREATED);
     }
 
     /**
@@ -110,9 +118,9 @@ class MogoniController extends AbstractController
         $decodeData = json_decode($userContent, true);
 
         // Decode json string fields
-        $decodeData['example'] = json_decode($decodeData['example'], true);
-        $decodeData['installation'] = json_decode($decodeData['installation'], true);
-        $decodeData['screenshot'] = json_decode($decodeData['screenshot'], true);
+        $decodeData['examples'] = json_decode($decodeData['examples'], true);
+        $decodeData['installations'] = json_decode($decodeData['installations'], true);
+        $decodeData['screenshots'] = json_decode($decodeData['screenshots'], true);
         $decodeData['github']['license'] = json_decode($decodeData['github']['license'], true);
         $userContent = json_encode($decodeData);
 
