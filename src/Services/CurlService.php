@@ -50,7 +50,14 @@ class CurlService
             return 'cURL Error #:' . $err;
         }
 
-        return json_decode($response, true);
+        $response = json_decode($response, true);
+
+        // check if github api return not found message
+        if (\array_key_exists('message', $response)) {
+            $response = [];
+        }
+
+        return $response;
     }
 
     /**

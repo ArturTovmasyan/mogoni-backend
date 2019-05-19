@@ -36,3 +36,10 @@ services:
         tags:
             - { name: sonata.admin, manager_type: orm, group: Menu, label: Profile }
         public: true
+
+    admin.publish_product:
+        class: App\Admin\PublishProductAdmin
+        arguments: [~, App\Entity\PublishProduct, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: Menu, label: Publish Product }
+        public: true

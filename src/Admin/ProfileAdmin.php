@@ -13,7 +13,7 @@ use Sonata\AdminBundle\Show\ShowMapper;
  * Class ProfileAdmin
  * @package App\Admin
  */
-class ProfileAdmin extends AbstractAdmin
+final class ProfileAdmin extends AbstractAdmin
 {
     protected $datagridValues = ['_sort_order' => 'DESC'];
 
@@ -23,6 +23,7 @@ class ProfileAdmin extends AbstractAdmin
     public function configureRoutes(RouteCollection $collection)
     {
         $collection->remove('export');
+        $collection->remove('create');
     }
 
     /**

@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class GithubController extends AbstractController
 {
     /**
-     * This function is used to get Repo data by github API
+     * This function is used to get and save Repo data by github API
      *
      * @Route("/api/v1/repo/data", methods={"POST"}, name="mogoni_github_repo_data")
      *
@@ -33,13 +33,22 @@ class GithubController extends AbstractController
     {
         $repoData = [];
 
-        try {
-            // get last 2 month date
-            $date = date('Y-m-d', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))) . '-2 month'));
-            $repoUrl = $request->get('repoUrl');
+        // get last 2 month date
+        $date = date('Y-m-d', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))) . '-2 month'));
+        $repoUrl = $request->get('repoUrl');
 
-            // get repository information from Github API-s
-            $this->getGlobalInfo($repoUrl, $repoData, $curlService);
+        // regex for github repo url
+        $repoRegex = '/^https?:\/\/github.com\/([a-zA-Z0-9-_]*)+\/([a-zA-Z0-9-_])+$/';
+
+        if (!preg_match($repoRegex, $repoUrl)) {
+            throw new Exception('Invalid Github repository url', JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // get repository information from Github API-s
+        $this->getGlobalInfo($repoUrl, $repoData, $curlService);
+
+        // check if data exist save it in DB
+        if (\count($repoData) > 0) {
 
             $this->getLanguageInfo($repoUrl, $repoData, $curlService);
 
@@ -52,9 +61,6 @@ class GithubController extends AbstractController
             $this->getLicenseInfo($repoUrl, $repoData, $curlService);
 
             $this->saveGithubData($repoData);
-
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e->getData() ?? []);
         }
 
         return $this->json([$repoData], JsonResponse::HTTP_OK);
@@ -75,15 +81,21 @@ class GithubController extends AbstractController
     {
         $profileData = [];
 
-        try {
-            // get repository information from Github API-s
-            $profileUrl = $request->get('profileUrl');
+        // get repository information from Github API-s
+        $profileUrl = $request->get('profileUrl');
 
-            $this->getProfileData($profileUrl, $profileData, $curlService);
+        // regex for github profile url
+        $profileRegex = '/^https?:\/\/github.com\/([a-zA-Z0-9-_]*)$/';
+
+        if (!preg_match($profileRegex, $profileUrl)) {
+            throw new Exception('Invalid Github profile url', JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $this->getProfileData($profileUrl, $profileData, $curlService);
+
+        // check if data exist save it in DB
+        if (\count($profileData) > 0) {
             $this->saveProfileData($profileData);
-
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e->getData() ?? []);
         }
 
         return $this->json([$profileData], JsonResponse::HTTP_OK);
@@ -98,9 +110,10 @@ class GithubController extends AbstractController
     {
         $repoInfoApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s');
         $githubData = $curlService->callGithubApi($repoInfoApi);
+
         if (\count($githubData) > 0) {
             $repoData = [
-                'title' => explode('/', $githubData['name'])[0],
+                'title' => $githubData['name'],
                 'subtitle' => $githubData['description'],
                 'html_url' => $githubData['html_url'],
                 'star' => $githubData['stargazers_count'],
@@ -115,7 +128,6 @@ class GithubController extends AbstractController
                     'spdx_id' => $githubData['license']['spdx_id'],
                     'url' => $githubData['license']['url'],
                 ]
-
             ];
         }
     }
@@ -130,10 +142,8 @@ class GithubController extends AbstractController
         $repoLanguageApi = $curlService->generateGithubRepoApi($repoUrl, 'repos/%s/%s/languages');
         $githubData = $curlService->callGithubApi($repoLanguageApi);
 
-        if (\count($githubData) > 0) {
-            $language = array_keys($githubData);
-            $repoData['language'] = reset($language);
-        }
+        $language = \count($githubData) > 0 ? array_keys($githubData)[0] : '';
+        $repoData['language'] = $language;
     }
 
     /**
@@ -292,7 +302,7 @@ class GithubController extends AbstractController
     /**
      * @param $githubData
      */
-    private function saveGithubData($githubData): void
+    private function saveGithubData(&$githubData): void
     {
         /** @var EntityManager $entityManager */
         $entityManager = $this->getDoctrine()->getManager();
@@ -309,19 +319,19 @@ class GithubController extends AbstractController
         $lastCommitDate = isset($githubData['commits']['lastDate']) ? new \DateTime($githubData['commits']['lastDate']) : '';
 
         $github->setTitle($githubData['title']);
-        $github->setSubtitle($githubData['subtitle']);
-        $github->setUrl($githubData['html_url']);
-        $github->setStarsCount($githubData['star']);
-        $github->setOwnerName($githubData['owner']['name']);
-        $github->setMainLanguage($githubData['language']);
-        $github->setOwnerAvatarUrl($githubData['owner']['avatar_url']);
-        $github->setOwnerGithubUrl($githubData['owner']['html_url']);
-        $github->setClosedIssuesCount($githubData['issues']['closed']);
-        $github->setOpenIssueCount($githubData['issues']['opened']);
-        $github->setCommitsCount($githubData['commits']['last2Month']);
-        $github->setAllCommitCount($githubData['commits']['total']);
-        $github->setLicense($githubData['license']);
-        $github->setReadme($githubData['readme']);
+        $github->setSubtitle($githubData['subtitle'] ?? '');
+        $github->setUrl($githubData['html_url'] ?? '');
+        $github->setStarsCount($githubData['star'] ?? 0);
+        $github->setOwnerName($githubData['owner']['name'] ?? '');
+        $github->setMainLanguage($githubData['language'] ?? '');
+        $github->setOwnerAvatarUrl($githubData['owner']['avatar_url'] ?? '');
+        $github->setOwnerGithubUrl($githubData['owner']['html_url'] ?? '');
+        $github->setClosedIssuesCount($githubData['issues']['closed'] ?? '');
+        $github->setOpenIssueCount($githubData['issues']['opened'] ?? '');
+        $github->setCommitsCount($githubData['commits']['last2Month'] ?? '');
+        $github->setAllCommitCount($githubData['commits']['total'] ?? '');
+        $github->setLicense($githubData['license'] ?? '');
+        $github->setReadme($githubData['readme'] ?? '');
 
         if ($lastCommitDate) {
             $github->setLastCommitDate($lastCommitDate);
@@ -329,6 +339,7 @@ class GithubController extends AbstractController
 
         $entityManager->persist($github);
         $entityManager->flush();
+        $githubData['id'] = $github->getId();
     }
 
     /**
