@@ -196,7 +196,9 @@ class MogoniController extends AbstractController
         );
 
         // Set the content disposition
+        $response->headers->set('Access-Control-Expose-Headers', "Content-Disposition");
         $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('Content-Type', "application/octet-stream");
 
         // Dispatch request
         return $response;
