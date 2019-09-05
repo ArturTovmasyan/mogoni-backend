@@ -43,13 +43,13 @@ class PublishProduct
 
     /**
      * @Assert\NotBlank()
-     * @ORM\Column(type="string", length=150, unique=true)
+     * @ORM\Column(type="string", length=150, unique=false)
      */
     private $authorName;
 
     /**
      * @Assert\NotBlank()
-     * @ORM\Column(type="string", length=150, unique=true)
+     * @ORM\Column(type="string", length=150, unique=false)
      */
     private $repoName;
 
