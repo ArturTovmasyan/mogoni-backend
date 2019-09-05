@@ -8,9 +8,9 @@
         "doctrine/annotations": "1.6.0",
         "doctrine/doctrine-bundle": "^1.6.10",
         "doctrine/orm": "^2.5.11",
+        "jms/serializer-bundle": "2.4.2",
         "nelmio/cors-bundle": "1.5.4",
         "sensio/framework-extra-bundle": "5.2.2",
-        "jms/serializer-bundle": "2.4.2",
         "sensiolabs/security-checker": "^5.0",
         "sonata-project/admin-bundle": "3.42.2",
         "sonata-project/core-bundle": "3.10.0",
@@ -19,18 +19,20 @@
         "symfony/apache-pack": "1.0.1",
         "symfony/console": "4.2.7",
         "symfony/dotenv": "4.2.7",
+        "symfony/finder": "4.2.7",
         "symfony/flex": "1.1.8",
         "symfony/framework-bundle": "4.2.7",
         "symfony/maker-bundle": "1.9.0",
         "symfony/routing": "4.2.7",
         "symfony/security-core": "4.2.7",
+        "symfony/twig-bundle": "4.2.7",
         "symfony/validator": "4.2.7",
-        "symfony/yaml": "4.2.7",
-        "symfony/twig-bundle": "4.2.7"
+        "symfony/yaml": "4.2.7"
     },
     "require-dev": {
         "symfony/profiler-pack": "1.0.4",
-        "symfony/var-dumper": "4.2.7"
+        "symfony/var-dumper": "4.2.7",
+        "symfony/web-server-bundle": "4.2.7"
     },
     "config": {
         "preferred-install": {
