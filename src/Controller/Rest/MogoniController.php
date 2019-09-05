@@ -84,7 +84,7 @@ class MogoniController extends AbstractController
         $webHost = getenv('WEB_HOST');
 
         // generate unique url
-        $uniqueUrl = $webHost.'/published-repo/%s/%s/%s';
+        $uniqueUrl = $webHost.'/published/%s/%s/%s';
         $uniqueUrl = sprintf($uniqueUrl, $product->getId(), str_replace(' ', '_', $requestData['author_name']),  str_replace(' ', '_', $requestData['repo_name']));
 
         // generate response data
