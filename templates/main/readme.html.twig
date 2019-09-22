@@ -1,0 +1,56 @@
+# {{ data.repo_name }}
+
+[![CI Status](http://img.shields.io/travis/{{ data.author_name }}/{{ data.repo_name }}.svg?style=flat)](https://travis-ci.org/{{ data.author_name }}/{{ data.repo_name }})
+[![Version](https://img.shields.io/cocoapods/v/OpinionzRate.svg?style=flat)](http://cocoapods.org/pods/{{ data.repo_name }})
+[![License](https://img.shields.io/cocoapods/l/{{ data.repo_name }}.svg?style=flat)](http://cocoapods.org/pods/{{ data.repo_name }})
+[![Platform](https://img.shields.io/cocoapods/p/{{ data.repo_name }}.svg?style=flat)](http://cocoapods.org/pods/{{ data.repo_name }})
+
+# Goal
+
+{{ data.goal }}
+
+# Screenshots
+
+{% for screenshot in data.screenshots %}
+    | ![{{ screenshot.title }}]({{ screenshot.image_url }}) |
+{% endfor %}
+
+# Roadmap
+
+{{ data.roadmap }}
+
+# Installation
+
+{% for installation in data.installations %}
+    ### {{ installation.title }}
+    {{ installation.description }}
+{% endfor %}
+
+# Usage
+
+<table>
+    <thead>
+    <tr>
+        <th>Example code</th>
+        <th>Screenshot</th>
+    </tr>
+    </thead>
+    {% for example in data.examples %}
+        <tr>
+            <td>
+                {{ example.title }}
+                <pre lang="swift">
+                    {{ example.source_code }}
+                </pre>
+            </td>
+            <td>
+                <img src="{{ example.image_url }}" alt="{{ example.title }}" width="250">
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+# Contacts
+
+{{ data.contact }}
+
