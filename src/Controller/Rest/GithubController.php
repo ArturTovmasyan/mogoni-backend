@@ -38,7 +38,7 @@ class GithubController extends AbstractController
         $repoUrl = $request->get('repoUrl');
 
         // regex for github repo url
-        $repoRegex = '/^https?:\/\/github.com\/([a-zA-Z0-9-_]*)+\/([a-zA-Z0-9-_])+.$/';
+        $repoRegex = '/^https?:\/\/github.com\/([a-zA-Z0-9-_]*)+\/([a-zA-Z0-9-_])+\/?$/';
 
         if (!preg_match($repoRegex, $repoUrl)) {
             throw new Exception('Invalid Github repository url', JsonResponse::HTTP_BAD_REQUEST);
