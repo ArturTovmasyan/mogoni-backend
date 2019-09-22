@@ -72,6 +72,7 @@ class Github
      *      max = 100,
      *      maxMessage = "Owner avatar url cannot be longer than {{ limit }} characters"
      * )
+     * @Serializer\Groups({"publish"})
      */
     private $ownerAvatarUrl;
 

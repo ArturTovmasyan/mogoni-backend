@@ -10,14 +10,10 @@ use Doctrine\ORM\EntityManager;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\File\MimeType\FileinfoMimeTypeGuesser;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -26,18 +22,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class MogoniController extends AbstractController
 {
-    /** KernelInterface $appKernel */
-    private $appKernel;
-
-    /**
-     * MogoniController constructor.
-     * @param KernelInterface $appKernel
-     */
-    public function __construct(KernelInterface $appKernel)
-    {
-        $this->appKernel = $appKernel;
-    }
-
     /**
      * This function is used to save published product
      *
@@ -168,9 +152,7 @@ class MogoniController extends AbstractController
         $requestData = $request->request->all();
 
         try {
-
             $template = $this->render('main/readme.html.twig', ['data' => $requestData]);
-
             $response = new Response($template);
 
             $disposition = HeaderUtils::makeDisposition(
@@ -179,30 +161,11 @@ class MogoniController extends AbstractController
             );
 
             $response->headers->set('Content-Disposition', $disposition);
-
             return $response;
-
 
         } catch (Exception $e) {
             $entityManager->getConnection()->rollBack();
             throw new Exception($e->getMessage(), $e->getCode(), $e->getData() ?? []);
         }
-
-//        // get web host
-//        $webHost = getenv('WEB_HOST');
-//
-//        // generate unique url
-//        $uniqueUrl = $webHost.'/published-repo/%s/%s/%s';
-//        $uniqueUrl = sprintf($uniqueUrl, $product->getId(), str_replace(' ', '_', $requestData['author_name']),  str_replace(' ', '_', $requestData['repo_name']));
-//
-//        // generate response data
-//        $response = [
-//            'id' => $product->getId(),
-//            'author_name' => $requestData['author_name'],
-//            'repo_name' => $requestData['repo_name'],
-//            'unique_url' => $uniqueUrl
-//        ];
-//
-//        return $this->json(['status' => JsonResponse::HTTP_CREATED, 'data' => $response], JsonResponse::HTTP_CREATED);
     }
 }
