@@ -12,7 +12,7 @@
 # Screenshots
 
 {% for screenshot in data.screenshots %}
-    | ![{{ screenshot.title }}]({{ screenshot.image_url }}) |
+     ![{{ screenshot.title }}]({{ screenshot.image_url }})
 {% endfor %}
 
 # Roadmap
@@ -22,7 +22,7 @@
 # Installation
 
 {% for installation in data.installations %}
-    ### {{ installation.title }}
+### {{ installation.title }}
     {{ installation.description }}
 {% endfor %}
 
